@@ -8,7 +8,7 @@ class postgresql::install {
     command => "/usr/bin/apt-get update",
   }
 
-  package {["postgresql", "postgresql-contrib"]:
+  package {["postgresql", "postgresql-contrib", "libpq-dev"]:
     ensure  => installed,
     require => Exec["apt-update-postgresql"]
   }
