@@ -3,9 +3,40 @@
 
 class postgresql::install {
 
-  # Update the packages apt
+  file { "/var/opt/keys":
+    ensure   => "directory",
+    owner    =>  root,
+    group    =>  root,
+    require  =>  Exec["common::basic"]
+  }
+
+  # Config key
+  file { "copy-postgresl-key":
+    name     => "/var/opt/keys/ACCC4CF8.key":
+    owner    =>  root,
+    group    =>  root,
+    content  =>  template("postgresql/ACCC4CF8.key"),
+    require  =>  File["/var/opt/keys"]
+  }
+
+  exec {"get-postgresql-key":
+    command => "/usr/bin/apt-key add --keyserver /var/opt/keys/ACCC4CF8.asc",
+    require => Class["copy-postgresql-key"]
+  }
+
+  # Config postgresql repo
+  file { "/etc/apt/sources.list.d/postgresql.list":
+    owner    =>  root,
+    group    =>  root,
+    mode     =>  644,
+    content  =>  template("postgresql/postgresql.list"),
+    require  =>  Exec['get-postgresql-key']
+  }
+
   exec { "apt-update-postgresql":
-    command => "/usr/bin/apt-get update",
+    command => "/usr/bin/apt-get update -y -q",
+    timeout => 0,
+    require => File["/etc/apt/sources.list.d/postgresql.list"]
   }
 
   package {["postgresql", "postgresql-contrib", "libpq-dev"]:
