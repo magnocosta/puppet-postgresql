@@ -7,12 +7,11 @@ class postgresql::install {
     ensure   => "directory",
     owner    =>  root,
     group    =>  root,
-    require  =>  Exec["common::basic"]
+    require  =>  Class["common::basic"]
   }
 
   # Config key
-  file { "copy-postgresl-key":
-    name     => "/var/opt/keys/ACCC4CF8.key":
+  file { "/var/opt/keys/ACCC4CF8.key":
     owner    =>  root,
     group    =>  root,
     content  =>  template("postgresql/ACCC4CF8.key"),
@@ -20,8 +19,8 @@ class postgresql::install {
   }
 
   exec {"get-postgresql-key":
-    command => "/usr/bin/apt-key add --keyserver /var/opt/keys/ACCC4CF8.asc",
-    require => Class["copy-postgresql-key"]
+    command => "/usr/bin/apt-key add /var/opt/keys/ACCC4CF8.key",
+    require => File["/var/opt/keys/ACCC4CF8.key"]
   }
 
   # Config postgresql repo
